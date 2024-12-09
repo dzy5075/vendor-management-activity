@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
+import { useState, useEffect } from "react";
+import Link from "next/link";
 import {
   Container,
   Typography,
@@ -17,16 +17,22 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
-} from '@mui/material';
-import DeleteIcon from '@mui/icons-material/Delete';
+} from "@mui/material";
+import DeleteIcon from "@mui/icons-material/Delete";
+import TableSortLabel from '@mui/material/TableSortLabel';
 
 export default function Home() {
   const [vendors, setVendors] = useState([]);
   const [open, setOpen] = useState(false);
   const [selectedVendorId, setSelectedVendorId] = useState(null);
 
+  const [orderBy, setOrderBy] = useState('id'); 
+  const [order, setOrder] = useState('asc');
+  // for sorting by vendor id or name
+
+
   useEffect(() => {
-    fetch('/api/vendors')
+    fetch("/api/vendors")
       .then((res) => res.json())
       .then((data) => setVendors(data));
   }, []);
@@ -44,7 +50,7 @@ export default function Home() {
   const handleDelete = async () => {
     try {
       const res = await fetch(`/api/vendors/${selectedVendorId}`, {
-        method: 'DELETE',
+        method: "DELETE",
       });
 
       if (res.ok) {
@@ -52,41 +58,97 @@ export default function Home() {
         setVendors(vendors.filter((vendor) => vendor.id !== selectedVendorId));
         handleClose();
       } else {
-        console.error('Failed to delete the vendor.');
+        console.error("Failed to delete the vendor.");
         // Optionally, handle error states here
       }
     } catch (error) {
-      console.error('An error occurred while deleting the vendor:', error);
+      console.error("An error occurred while deleting the vendor:", error);
       // Optionally, handle error states here
     }
   };
 
+  const handleSort = (property) => {
+    const isAsc = orderBy === property && order === 'asc';
+    setOrder(isAsc ? 'desc' : 'asc');
+    setOrderBy(property);
+  };
+  
+  vendors.sort((a, b) => {
+    if (order === 'asc') {
+      return a[orderBy] < b[orderBy] ? -1 : 1;
+    }
+    return a[orderBy] > b[orderBy] ? -1 : 1;
+  });
+  
+  // Sort vendor based on orderBy or order
   return (
     <Container>
       <Typography variant="h4" component="h1" gutterBottom>
         Vendor Management System
       </Typography>
       <Link href="/add" passHref>
-        <Button variant="contained" color="primary" style={{ marginBottom: '20px' }}>
+        <Button
+          variant="contained"
+          color="primary"
+          style={{ marginBottom: "20px" }}
+        >
           Add Vendor
         </Button>
       </Link>
-      <TableContainer component={Paper}>
+      <TableContainer component={Paper} sx={{ overflowX: "auto" }}>
+        {/* Allows table to be scrollable on smaller screens */}
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell><strong>ID</strong></TableCell>
-              <TableCell><strong>Name</strong></TableCell>
-              <TableCell><strong>Contact</strong></TableCell>
-              <TableCell><strong>Email</strong></TableCell>
-              <TableCell><strong>Phone</strong></TableCell>
-              <TableCell><strong>Address</strong></TableCell>
-              <TableCell><strong>Actions</strong></TableCell>
+            <TableCell>
+              {/* Sort by ID */}
+              <TableSortLabel
+                active={orderBy === 'id'}
+                direction={orderBy === 'id' ? order : 'asc'}
+                onClick={() => handleSort('id')}
+              >
+                <strong>ID</strong>
+              </TableSortLabel>
+            </TableCell>
+            <TableCell>
+              {/* Sort by Vendor Name */}
+              <TableSortLabel
+                active={orderBy === 'name'}
+                direction={orderBy === 'name' ? order : 'asc'}
+                onClick={() => handleSort('name')}
+              >
+                <strong>Name</strong>
+              </TableSortLabel>
+            </TableCell>
+              <TableCell>
+                <strong>Contact</strong>
+              </TableCell>
+              <TableCell>
+                <strong>Email</strong>
+              </TableCell>
+              <TableCell>
+                <strong>Phone</strong>
+              </TableCell>
+              <TableCell>
+                <strong>Address</strong>
+              </TableCell>
+              <TableCell>
+                <strong>Actions</strong>
+              </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {vendors.map((vendor) => (
-              <TableRow key={vendor.id}>
+              <TableRow
+                key={vendor.id}
+                sx={{
+                  "&:nth-of-type(odd)": {
+                    backgroundColor: "rgba(0, 0, 0, 0.04)",
+                  },
+                  "&:hover": { backgroundColor: "rgba(0, 0, 0, 0.1)" },
+                }}
+              >
+                {/* Hover color added to improve visability for vendor table */}
                 <TableCell>{vendor.id}</TableCell>
                 <TableCell>{vendor.name}</TableCell>
                 <TableCell>{vendor.contact}</TableCell>
@@ -99,7 +161,7 @@ export default function Home() {
                       variant="outlined"
                       color="primary"
                       size="small"
-                      style={{ marginRight: '10px' }}
+                      style={{ marginRight: "10px" }}
                     >
                       Edit
                     </Button>
@@ -134,8 +196,13 @@ export default function Home() {
         <DialogTitle id="alert-dialog-title">{"Delete Vendor"}</DialogTitle>
         <DialogContent>
           <DialogContentText id="alert-dialog-description">
-            Are you sure you want to delete this vendor? This action cannot be undone.
+            Are you sure you want to delete{" "}
+            <strong>
+              {vendors.find((v) => v.id === selectedVendorId)?.name}
+            </strong>
+            ? This action cannot be undone.
           </DialogContentText>
+          {/* Revised context to be more specific to vendor when delete button is clicked */}
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose} color="primary">
