@@ -1,113 +1,108 @@
-// pages/add.js
-import { useState } from 'react';
-import { useRouter } from 'next/router';
+import { useState } from "react";
+import { useRouter } from "next/router";
 import {
   Container,
   Typography,
   TextField,
   Button,
   Box,
-} from '@mui/material';
+  Snackbar,
+  Alert,
+  CircularProgress,
+} from "@mui/material";
+
+// Define initial state for form fields
+const initialState = { name: "", contact: "", email: "", phone: "", address: "" };
 
 export default function AddVendor() {
-  const [vendor, setVendor] = useState({
-    name: '',
-    contact: '',
-    email: '',
-    phone: '',
-    address: '',
-  });
-
+  const [vendor, setVendor] = useState(initialState); // State for form data
+  const [errors, setErrors] = useState({}); 
+  const [loading, setLoading] = useState(false); // Loading indicator
+  const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" }); // Snackbar for feedback
   const router = useRouter();
 
-  const handleChange = (e) => {
+  // Handle input changes for all fields
+  const handleChange = (e) =>
     setVendor({ ...vendor, [e.target.name]: e.target.value });
+
+  // Validate form fields and return true if valid
+  const validateForm = () => {
+    const validationErrors = Object.entries(vendor).reduce((acc, [key, value]) => {
+      if (!value.trim()) acc[key] = `${key.charAt(0).toUpperCase() + key.slice(1)} is required.`;
+      if (key === "email" && !/^\S+@\S+\.\S+$/.test(value)) acc.email = "Valid email is required.";
+      return acc;
+    }, {});
+    setErrors(validationErrors);
+    return Object.keys(validationErrors).length === 0;
   };
 
+  // Submit form data to the server
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const res = await fetch('/api/vendors', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(vendor),
-    });
-    if (res.ok) {
-      router.push('/');
+    if (!validateForm()) return; // Stop if validation fails
+
+    setLoading(true);
+    try {
+      const res = await fetch("/api/vendors", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(vendor),
+      });
+
+      if (!res.ok) throw new Error("Failed to add vendor.");
+
+      setSnackbar({ open: true, message: "Vendor added successfully!", severity: "success" });
+      setTimeout(() => router.push("/"), 2000); // Redirect after success
+    } catch (error) {
+      setSnackbar({ open: true, message: error.message, severity: "error" });
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <Container maxWidth="sm">
-      <Typography variant="h4" component="h1" gutterBottom>
+    <Container maxWidth="sm" sx={{ mt: 4 }}>
+      <Typography variant="h4" align="center" gutterBottom>
         Add New Vendor
       </Typography>
-      <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
-        <TextField
-          margin="normal"
-          required
-          fullWidth
-          label="Name"
-          name="name"
-          value={vendor.name}
-          onChange={handleChange}
-        />
-        <TextField
-          margin="normal"
-          required
-          fullWidth
-          label="Contact"
-          name="contact"
-          value={vendor.contact}
-          onChange={handleChange}
-        />
-        <TextField
-          margin="normal"
-          required
-          fullWidth
-          label="Email"
-          name="email"
-          type="email"
-          value={vendor.email}
-          onChange={handleChange}
-        />
-        <TextField
-          margin="normal"
-          required
-          fullWidth
-          label="Phone"
-          name="phone"
-          value={vendor.phone}
-          onChange={handleChange}
-        />
-        <TextField
-          margin="normal"
-          required
-          fullWidth
-          label="Address"
-          name="address"
-          value={vendor.address}
-          onChange={handleChange}
-        />
+      <Box component="form" onSubmit={handleSubmit} sx={{ display: "grid", gap: 2 }}>
+        {/* Dynamically render input fields */}
+        {Object.keys(initialState).map((field) => (
+          <TextField
+            key={field}
+            name={field}
+            label={field.charAt(0).toUpperCase() + field.slice(1)} // Capitalized label
+            value={vendor[field]}
+            onChange={handleChange}
+            error={!!errors[field]}
+            helperText={errors[field]}
+            fullWidth
+            required
+          />
+        ))}
         <Button
           type="submit"
-          fullWidth
           variant="contained"
           color="primary"
-          sx={{ mt: 3, mb: 2 }}
-        >
-          Add Vendor
-        </Button>
-        {/* Added cancel button to return back to home page */}
-        <Button
           fullWidth
-          variant="outlined"
-          color="secondary"
-          sx={{ mt: 1 }}
-          onClick={() => router.push("/")}
+          disabled={loading}
+          startIcon={loading && <CircularProgress size={20} color="inherit" />}
         >
+          {loading ? "Saving..." : "Add Vendor"}
+        </Button>
+        <Button variant="outlined" color="secondary" fullWidth onClick={() => router.push("/")}>
           Cancel
         </Button>
       </Box>
+      {/* Snackbar for feedback on success or error */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert severity={snackbar.severity}>{snackbar.message}</Alert>
+      </Snackbar>
     </Container>
   );
 }

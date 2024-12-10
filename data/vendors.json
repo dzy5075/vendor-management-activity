@@ -62,5 +62,21 @@
     "phone": "678-901-2345",
     "address": "Outback Road",
     "id": 8
+  },
+  {
+    "name": "McDonalds",
+    "contact": "McDonald's Office",
+    "email": "Mcdonalds@email.com",
+    "phone": "333-333-3333",
+    "address": "McDonalds Ave",
+    "id": 9
+  },
+  {
+    "name": "Burger King",
+    "contact": "BK",
+    "email": "BK@email.com",
+    "phone": "222-222-2222",
+    "address": "Bk Road",
+    "id": 10
   }
 ]

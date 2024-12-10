@@ -17,184 +17,177 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
+  TextField,
+  Snackbar,
+  Alert,
+  TablePagination,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import TableSortLabel from "@mui/material/TableSortLabel";
 
 export default function Home() {
   const [vendors, setVendors] = useState([]);
-  const [open, setOpen] = useState(false);
-  const [selectedVendorId, setSelectedVendorId] = useState(null);
-
+  const [searchQuery, setSearchQuery] = useState("");
   const [orderBy, setOrderBy] = useState("id");
   const [order, setOrder] = useState("asc");
-  // for sorting by vendor id or name
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [open, setOpen] = useState(false);
+  const [selectedVendorId, setSelectedVendorId] = useState(null);
+  const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" });
 
+  // Fetch vendors from the API
   useEffect(() => {
     fetch("/api/vendors")
       .then((res) => res.json())
-      .then((data) => setVendors(data));
+      .then((data) => setVendors(data))
+      .catch((error) => console.error("Failed to fetch vendors:", error));
   }, []);
 
-  const handleClickOpen = (id) => {
-    setSelectedVendorId(id);
-    setOpen(true);
-  };
+  // Handle search input
+  const handleSearch = (e) => setSearchQuery(e.target.value.toLowerCase());
 
-  const handleClose = () => {
-    setOpen(false);
-    setSelectedVendorId(null);
-  };
-
-  const handleDelete = async () => {
-    try {
-      const res = await fetch(`/api/vendors/${selectedVendorId}`, {
-        method: "DELETE",
-      });
-
-      if (res.ok) {
-        // Remove the deleted vendor from the state
-        setVendors(vendors.filter((vendor) => vendor.id !== selectedVendorId));
-        handleClose();
-      } else {
-        console.error("Failed to delete the vendor.");
-        // Optionally, handle error states here
-      }
-    } catch (error) {
-      console.error("An error occurred while deleting the vendor:", error);
-      // Optionally, handle error states here
-    }
-  };
-
+  // Handle column sorting
   const handleSort = (property) => {
     const isAsc = orderBy === property && order === "asc";
     setOrder(isAsc ? "desc" : "asc");
     setOrderBy(property);
   };
 
-  vendors.sort((a, b) => {
-    if (order === "asc") {
-      return a[orderBy] < b[orderBy] ? -1 : 1;
-    }
-    return a[orderBy] > b[orderBy] ? -1 : 1;
-  });
+  // Handle pagination changes
+  const handleChangePage = (event, newPage) => setPage(newPage);
 
-  // Sort vendor based on orderBy or order
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0); // Reset to the first page
+  };
+
+  // Open delete confirmation dialog
+  const handleClickOpen = (id) => {
+    setSelectedVendorId(id);
+    setOpen(true);
+  };
+
+  // Close delete confirmation dialog
+  const handleClose = () => {
+    setOpen(false);
+    setSelectedVendorId(null);
+  };
+
+  // Handle vendor deletion 
+  const handleDelete = async () => {
+    try {
+      const res = await fetch(`/api/vendors/${selectedVendorId}`, { method: "DELETE" });
+      if (res.ok) {
+        setVendors(vendors.filter((vendor) => vendor.id !== selectedVendorId));
+        handleClose();
+        setSnackbar({ open: true, message: "Vendor deleted successfully.", severity: "success" });
+      } else {
+        throw new Error("Failed to delete vendor.");
+      }
+    } catch (error) {
+      setSnackbar({ open: true, message: error.message, severity: "error" });
+    }
+  };
+
+  // Close snackbar notifications
+  const handleCloseSnackbar = () => setSnackbar({ ...snackbar, open: false });
+
+  // Filter and sort vendors
+  const filteredVendors = vendors
+    .filter((vendor) =>
+      [vendor.name, vendor.contact, vendor.email, vendor.phone]
+        .map((field) => (field || "").toLowerCase())
+        .some((field) => field.includes(searchQuery))
+    )
+    .sort((a, b) => {
+      const aValue = a[orderBy] || "";
+      const bValue = b[orderBy] || "";
+      if (typeof aValue === "string" && typeof bValue === "string") {
+        return order === "asc" ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
+      }
+      return order === "asc" ? aValue - bValue : bValue - aValue;
+    });
+
+  // Paginate vendors
+  const paginatedVendors = filteredVendors.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+
   return (
     <Container>
       <Typography variant="h4" component="h1" gutterBottom>
         Vendor Management System
       </Typography>
       <Link href="/add" passHref>
-        <Button
-          variant="contained"
-          color="primary"
-          style={{ marginBottom: "20px" }}
-        >
+        <Button variant="contained" color="primary" sx={{ mb: 2 }}>
           Add Vendor
         </Button>
       </Link>
-
-      <TableContainer
-        component={Paper}
-        sx={{
-          overflowX: "auto",
-          maxHeight: "80vh", // Constrain the table's height for scrollable content
-        }}
-      >
-        {/* Sticky Header to ensure layout adapts smoothly to different devices */}
+      <TextField
+        fullWidth
+        placeholder="Search by Name, Contact, or Email"
+        onChange={handleSearch}
+        value={searchQuery}
+        sx={{ mb: 2 }}
+      />
+      <TableContainer component={Paper} sx={{ overflowX: "auto", maxHeight: "80vh" }}>
         <Table stickyHeader>
           <TableHead>
-            <TableRow
-              sx={{
-                backgroundColor: "background.paper", // Ensure sticky header background matches the theme
-              }}
-            >
+            <TableRow>
               <TableCell>
-                {/* Sort by ID */}
                 <TableSortLabel
                   active={orderBy === "id"}
                   direction={orderBy === "id" ? order : "asc"}
                   onClick={() => handleSort("id")}
                 >
-                  <strong>ID</strong>
+                  ID
                 </TableSortLabel>
               </TableCell>
               <TableCell>
-                {/* Sort by Vendor Name */}
                 <TableSortLabel
                   active={orderBy === "name"}
                   direction={orderBy === "name" ? order : "asc"}
                   onClick={() => handleSort("name")}
                 >
-                  <strong>Name</strong>
+                  Name
                 </TableSortLabel>
               </TableCell>
               <TableCell>
-                {/* Sort by Contact */}
                 <TableSortLabel
                   active={orderBy === "contact"}
                   direction={orderBy === "contact" ? order : "asc"}
                   onClick={() => handleSort("contact")}
                 >
-                  <strong>Contact</strong>
+                  Contact
                 </TableSortLabel>
               </TableCell>
-              <TableCell>
-                <strong>Email</strong>
-              </TableCell>
-              <TableCell>
-                <strong>Phone</strong>
-              </TableCell>
-              <TableCell>
-                <strong>Address</strong>
-              </TableCell>
-              <TableCell>
-                <strong>Actions</strong>
-              </TableCell>
+              <TableCell>Email</TableCell>
+              <TableCell>Phone</TableCell>
+              <TableCell>Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {vendors.map((vendor) => (
-              <TableRow
-                key={vendor.id}
-                sx={{
-                  "&:nth-of-type(odd)": {
-                    backgroundColor: "rgba(0, 0, 0, 0.04)",
-                  },
-                  "&:hover": { backgroundColor: "rgba(0, 0, 0, 0.1)" },
-                }}
-              >
-                {/* Hover color added to improve visibility for vendor table */}
+            {paginatedVendors.map((vendor) => (
+              <TableRow key={vendor.id}>
                 <TableCell>{vendor.id}</TableCell>
                 <TableCell>{vendor.name}</TableCell>
                 <TableCell>{vendor.contact}</TableCell>
                 <TableCell>{vendor.email}</TableCell>
                 <TableCell>{vendor.phone}</TableCell>
-                <TableCell>{vendor.address}</TableCell>
                 <TableCell>
                   <Link href={`/edit/${vendor.id}`} passHref>
-                    <Button
-                      variant="outlined"
-                      color="primary"
-                      size="small"
-                      style={{ marginRight: "10px" }}
-                    >
+                    <Button variant="outlined" color="primary" size="small">
                       Edit
                     </Button>
                   </Link>
-                  <IconButton
-                    color="secondary"
-                    onClick={() => handleClickOpen(vendor.id)}
-                  >
+                  <IconButton color="secondary" onClick={() => handleClickOpen(vendor.id)}>
                     <DeleteIcon />
                   </IconButton>
                 </TableCell>
               </TableRow>
             ))}
-            {vendors.length === 0 && (
+            {paginatedVendors.length === 0 && (
               <TableRow>
-                <TableCell colSpan={7} align="center">
+                <TableCell colSpan={6} align="center">
                   No vendors available.
                 </TableCell>
               </TableRow>
@@ -202,34 +195,38 @@ export default function Home() {
           </TableBody>
         </Table>
       </TableContainer>
-
-      {/* Confirmation Dialog */}
-      <Dialog
-        open={open}
-        onClose={handleClose}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
-      >
-        <DialogTitle id="alert-dialog-title">{"Delete Vendor"}</DialogTitle>
+      <TablePagination
+        rowsPerPageOptions={[5, 10, 25]}
+        component="div"
+        count={filteredVendors.length}
+        rowsPerPage={rowsPerPage}
+        page={page}
+        onPageChange={handleChangePage}
+        onRowsPerPageChange={handleChangeRowsPerPage}
+      />
+      <Dialog open={open} onClose={handleClose}>
+        <DialogTitle>Delete Vendor</DialogTitle>
         <DialogContent>
-          <DialogContentText id="alert-dialog-description">
+          <DialogContentText>
             Are you sure you want to delete{" "}
-            <strong>
-              {vendors.find((v) => v.id === selectedVendorId)?.name}
-            </strong>
-            ? This action cannot be undone.
+            <strong>{vendors.find((v) => v.id === selectedVendorId)?.name}</strong>? This action
+            cannot be undone.
           </DialogContentText>
-          {/* Revised context to be more specific to vendor when delete button is clicked */}
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose} color="primary">
             Cancel
           </Button>
-          <Button onClick={handleDelete} color="secondary" autoFocus>
+          <Button onClick={handleDelete} color="secondary">
             Delete
           </Button>
         </DialogActions>
       </Dialog>
+      <Snackbar open={snackbar.open} autoHideDuration={6000} onClose={handleCloseSnackbar}>
+        <Alert onClose={handleCloseSnackbar} severity={snackbar.severity}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Container>
   );
 }
