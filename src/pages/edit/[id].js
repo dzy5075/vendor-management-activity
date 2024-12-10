@@ -8,20 +8,27 @@ import {
   Box,
   Snackbar,
   Alert,
-  CircularProgress,
 } from "@mui/material";
 
 export default function EditVendor() {
   const router = useRouter();
   const { id } = router.query;
 
-  const [vendor, setVendor] = useState({ id: "", name: "", contact: "", email: "", phone: "", address: "" });
+  const [vendor, setVendor] = useState({
+    id: "",
+    name: "",
+    contact: "",
+    email: "",
+    phone: "",
+    address: "",
+  });
   const [errors, setErrors] = useState({});
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
-  const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "" });
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
 
-  // Fetch vendor data when component loads
   useEffect(() => {
     if (!id) return;
     fetch(`/api/vendors/${id}`)
@@ -30,26 +37,26 @@ export default function EditVendor() {
       .catch((err) => {
         setSnackbar({ open: true, message: err, severity: "error" });
         router.push("/");
-      })
-      .finally(() => setIsLoading(false));
+      });
   }, [id, router]);
 
-  // Validate form fields
+  const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);
+
   const validateForm = () => {
-    const newErrors = {};
+    const fieldErrors = {};
     Object.entries(vendor).forEach(([key, value]) => {
-      if (key !== "id" && !value.trim()) newErrors[key] = `${key.charAt(0).toUpperCase() + key.slice(1)} is required.`;
-      if (key === "email" && !/^\S+@\S+\.\S+$/.test(value)) newErrors.email = "Valid email is required.";
+      if (key !== "id" && !value.trim())
+        fieldErrors[key] = `${capitalize(key)} is required.`;
+      if (key === "email" && !/^\S+@\S+\.\S+$/.test(value))
+        fieldErrors.email = "Valid email is required.";
     });
-    setErrors(newErrors);
-    return !Object.keys(newErrors).length;
+    setErrors(fieldErrors);
+    return Object.keys(fieldErrors).length === 0;
   };
 
-  // Submit updated vendor data
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
-    setIsSaving(true);
     try {
       const res = await fetch(`/api/vendors/${id}`, {
         method: "PUT",
@@ -57,21 +64,27 @@ export default function EditVendor() {
         body: JSON.stringify(vendor),
       });
       if (!res.ok) throw new Error("Failed to update vendor.");
-      setSnackbar({ open: true, message: "Vendor updated successfully!", severity: "success" });
+      setSnackbar({
+        open: true,
+        message: "Vendor updated successfully!",
+        severity: "success",
+      });
       setTimeout(() => router.push("/"), 2000);
-    } catch (error) {
-      setSnackbar({ open: true, message: error.message, severity: "error" });
-    } finally {
-      setIsSaving(false);
+    } catch (err) {
+      setSnackbar({ open: true, message: err.message, severity: "error" });
     }
   };
 
-  if (isLoading) return <Container sx={{ display: "flex", justifyContent: "center", height: "80vh" }}><CircularProgress /></Container>;
-
   return (
     <Container maxWidth="sm" sx={{ mt: 4 }}>
-      <Typography variant="h4" align="center" gutterBottom>Edit Vendor</Typography>
-      <Box component="form" onSubmit={handleSubmit} sx={{ display: "grid", gap: 2 }}>
+      <Typography variant="h4" align="center" gutterBottom>
+        Edit Vendor
+      </Typography>
+      <Box
+        component="form"
+        onSubmit={handleSubmit}
+        sx={{ display: "grid", gap: 2 }}
+      >
         {Object.keys(vendor).map((field) =>
           field === "id" ? (
             <TextField
@@ -86,9 +99,11 @@ export default function EditVendor() {
             <TextField
               key={field}
               name={field}
-              label={field.charAt(0).toUpperCase() + field.slice(1)}
+              label={capitalize(field)}
               value={vendor[field]}
-              onChange={(e) => setVendor({ ...vendor, [e.target.name]: e.target.value })}
+              onChange={(e) =>
+                setVendor({ ...vendor, [e.target.name]: e.target.value })
+              }
               error={!!errors[field]}
               helperText={errors[field]}
               fullWidth
@@ -96,25 +111,23 @@ export default function EditVendor() {
             />
           )
         )}
-        <Button
-          type="submit"
-          variant="contained"
-          color="primary"
-          fullWidth
-          disabled={isSaving}
-          startIcon={isSaving && <CircularProgress size={20} />}
-        >
-          {isSaving ? "Saving..." : "Update Vendor"}
+        <Button type="submit" variant="contained" color="primary" fullWidth>
+          Update Vendor
         </Button>
-        <Button variant="outlined" color="secondary" fullWidth onClick={() => router.push("/")}>
+        <Button
+          variant="outlined"
+          color="secondary"
+          fullWidth
+          onClick={() => router.push("/")}
+        >
           Cancel
         </Button>
       </Box>
       <Snackbar
         open={snackbar.open}
         autoHideDuration={6000}
-        onClose={() => setSnackbar({ ...snackbar, open: false })}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
       >
         <Alert severity={snackbar.severity}>{snackbar.message}</Alert>
       </Snackbar>

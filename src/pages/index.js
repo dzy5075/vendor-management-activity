@@ -28,15 +28,19 @@ import TableSortLabel from "@mui/material/TableSortLabel";
 export default function Home() {
   const [vendors, setVendors] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [orderBy, setOrderBy] = useState("id");
-  const [order, setOrder] = useState("asc");
+  const [sortColumn, setSortColumn] = useState("id");
+  const [sortOrder, setSortOrder] = useState("asc");
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
-  const [open, setOpen] = useState(false);
-  const [selectedVendorId, setSelectedVendorId] = useState(null);
-  const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" });
 
-  // Fetch vendors from the API
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedVendorId, setSelectedVendorId] = useState(null);
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
+
   useEffect(() => {
     fetch("/api/vendors")
       .then((res) => res.json())
@@ -44,73 +48,72 @@ export default function Home() {
       .catch((error) => console.error("Failed to fetch vendors:", error));
   }, []);
 
-  // Handle search input
-  const handleSearch = (e) => setSearchQuery(e.target.value.toLowerCase());
+  const handleSearchChange = (e) =>
+    setSearchQuery(e.target.value.toLowerCase());
 
-  // Handle column sorting
   const handleSort = (property) => {
-    const isAsc = orderBy === property && order === "asc";
-    setOrder(isAsc ? "desc" : "asc");
-    setOrderBy(property);
+    const isAsc = sortColumn === property && sortOrder === "asc";
+    setSortOrder(isAsc ? "desc" : "asc");
+    setSortColumn(property);
   };
 
-  // Handle pagination changes
-  const handleChangePage = (event, newPage) => setPage(newPage);
-
-  const handleChangeRowsPerPage = (event) => {
+  const handlePageChange = (event, newPage) => setPage(newPage);
+  const handleRowsPerPageChange = (event) => {
     setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0); // Reset to the first page
+    setPage(0);
   };
 
-  // Open delete confirmation dialog
-  const handleClickOpen = (id) => {
+  const openDeleteDialog = (id) => {
     setSelectedVendorId(id);
-    setOpen(true);
+    setDeleteDialogOpen(true);
   };
 
-  // Close delete confirmation dialog
-  const handleClose = () => {
-    setOpen(false);
+  const closeDeleteDialog = () => {
+    setDeleteDialogOpen(false);
     setSelectedVendorId(null);
   };
 
-  // Handle vendor deletion 
   const handleDelete = async () => {
     try {
-      const res = await fetch(`/api/vendors/${selectedVendorId}`, { method: "DELETE" });
-      if (res.ok) {
-        setVendors(vendors.filter((vendor) => vendor.id !== selectedVendorId));
-        handleClose();
-        setSnackbar({ open: true, message: "Vendor deleted successfully.", severity: "success" });
-      } else {
-        throw new Error("Failed to delete vendor.");
-      }
+      const res = await fetch(`/api/vendors/${selectedVendorId}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) throw new Error("Failed to delete vendor.");
+      setVendors((prev) => prev.filter((v) => v.id !== selectedVendorId));
+      closeDeleteDialog();
+      setSnackbar({
+        open: true,
+        message: "Vendor deleted successfully.",
+        severity: "success",
+      });
     } catch (error) {
       setSnackbar({ open: true, message: error.message, severity: "error" });
     }
   };
 
-  // Close snackbar notifications
-  const handleCloseSnackbar = () => setSnackbar({ ...snackbar, open: false });
+  const closeSnackbar = () => setSnackbar((prev) => ({ ...prev, open: false }));
 
-  // Filter and sort vendors
   const filteredVendors = vendors
     .filter((vendor) =>
       [vendor.name, vendor.contact, vendor.email, vendor.phone]
-        .map((field) => (field || "").toLowerCase())
+        .map((val) => (val || "").toLowerCase())
         .some((field) => field.includes(searchQuery))
     )
     .sort((a, b) => {
-      const aValue = a[orderBy] || "";
-      const bValue = b[orderBy] || "";
+      const aValue = a[sortColumn] || "";
+      const bValue = b[sortColumn] || "";
       if (typeof aValue === "string" && typeof bValue === "string") {
-        return order === "asc" ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
+        return sortOrder === "asc"
+          ? aValue.localeCompare(bValue)
+          : bValue.localeCompare(aValue);
       }
-      return order === "asc" ? aValue - bValue : bValue - aValue;
+      return sortOrder === "asc" ? aValue - bValue : bValue - aValue;
     });
 
-  // Paginate vendors
-  const paginatedVendors = filteredVendors.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+  const paginatedVendors = filteredVendors.slice(
+    page * rowsPerPage,
+    page * rowsPerPage + rowsPerPage
+  );
 
   return (
     <Container>
@@ -119,50 +122,59 @@ export default function Home() {
       </Typography>
       <Link href="/add" passHref>
         <Button variant="contained" color="primary" sx={{ mb: 2 }}>
-          Add Vendor
+          <strong>Add Vendor</strong>
         </Button>
       </Link>
       <TextField
         fullWidth
         placeholder="Search by Name, Contact, or Email"
-        onChange={handleSearch}
+        onChange={handleSearchChange}
         value={searchQuery}
         sx={{ mb: 2 }}
       />
-      <TableContainer component={Paper} sx={{ overflowX: "auto", maxHeight: "80vh" }}>
+      <TableContainer
+        component={Paper}
+        sx={{ overflowX: "auto", maxHeight: "80vh" }}
+      >
         <Table stickyHeader>
           <TableHead>
             <TableRow>
               <TableCell>
                 <TableSortLabel
-                  active={orderBy === "id"}
-                  direction={orderBy === "id" ? order : "asc"}
+                  active={sortColumn === "id"}
+                  direction={sortColumn === "id" ? sortOrder : "asc"}
                   onClick={() => handleSort("id")}
                 >
-                  ID
+                  <strong>ID</strong>
                 </TableSortLabel>
               </TableCell>
               <TableCell>
                 <TableSortLabel
-                  active={orderBy === "name"}
-                  direction={orderBy === "name" ? order : "asc"}
+                  active={sortColumn === "name"}
+                  direction={sortColumn === "name" ? sortOrder : "asc"}
                   onClick={() => handleSort("name")}
                 >
-                  Name
+                  <strong>Name</strong>
                 </TableSortLabel>
               </TableCell>
               <TableCell>
                 <TableSortLabel
-                  active={orderBy === "contact"}
-                  direction={orderBy === "contact" ? order : "asc"}
+                  active={sortColumn === "contact"}
+                  direction={sortColumn === "contact" ? sortOrder : "asc"}
                   onClick={() => handleSort("contact")}
                 >
-                  Contact
+                  <strong>Contact</strong>
                 </TableSortLabel>
               </TableCell>
-              <TableCell>Email</TableCell>
-              <TableCell>Phone</TableCell>
-              <TableCell>Actions</TableCell>
+              <TableCell>
+                <strong>Email</strong>
+              </TableCell>
+              <TableCell>
+                <strong>Phone</strong>
+              </TableCell>
+              <TableCell>
+                <strong>Actions</strong>
+              </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -175,11 +187,19 @@ export default function Home() {
                 <TableCell>{vendor.phone}</TableCell>
                 <TableCell>
                   <Link href={`/edit/${vendor.id}`} passHref>
-                    <Button variant="outlined" color="primary" size="small">
+                    <Button
+                      variant="outlined"
+                      color="primary"
+                      size="small"
+                      sx={{ mr: 1 }}
+                    >
                       Edit
                     </Button>
                   </Link>
-                  <IconButton color="secondary" onClick={() => handleClickOpen(vendor.id)}>
+                  <IconButton
+                    color="secondary"
+                    onClick={() => openDeleteDialog(vendor.id)}
+                  >
                     <DeleteIcon />
                   </IconButton>
                 </TableCell>
@@ -201,20 +221,22 @@ export default function Home() {
         count={filteredVendors.length}
         rowsPerPage={rowsPerPage}
         page={page}
-        onPageChange={handleChangePage}
-        onRowsPerPageChange={handleChangeRowsPerPage}
+        onPageChange={handlePageChange}
+        onRowsPerPageChange={handleRowsPerPageChange}
       />
-      <Dialog open={open} onClose={handleClose}>
+      <Dialog open={deleteDialogOpen} onClose={closeDeleteDialog}>
         <DialogTitle>Delete Vendor</DialogTitle>
         <DialogContent>
           <DialogContentText>
             Are you sure you want to delete{" "}
-            <strong>{vendors.find((v) => v.id === selectedVendorId)?.name}</strong>? This action
-            cannot be undone.
+            <strong>
+              {vendors.find((v) => v.id === selectedVendorId)?.name}
+            </strong>
+            ? This action cannot be undone.
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose} color="primary">
+          <Button onClick={closeDeleteDialog} color="primary">
             Cancel
           </Button>
           <Button onClick={handleDelete} color="secondary">
@@ -222,10 +244,13 @@ export default function Home() {
           </Button>
         </DialogActions>
       </Dialog>
-      <Snackbar open={snackbar.open} autoHideDuration={6000} onClose={handleCloseSnackbar}>
-        <Alert onClose={handleCloseSnackbar} severity={snackbar.severity}>
-          {snackbar.message}
-        </Alert>
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={closeSnackbar}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert severity={snackbar.severity}>{snackbar.message}</Alert>
       </Snackbar>
     </Container>
   );
