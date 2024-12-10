@@ -24,59 +24,43 @@
     "address": "789 Pine Road, Gotham"
   },
   {
-    "name": "a",
-    "contact": "",
-    "email": "",
-    "phone": "",
-    "address": "",
+    "name": "Apple Bee",
+    "contact": "Apple Cee",
+    "email": "applebee@email.com",
+    "phone": "123-123-1234",
+    "address": "AppleBee Road",
     "id": 4
   },
   {
-    "name": "b",
-    "contact": "",
-    "email": "",
-    "phone": "",
-    "address": "",
+    "name": "Olive Garden",
+    "contact": "Corporate",
+    "email": "olivegarden@email.com",
+    "phone": "234-567-8901",
+    "address": "Olive Garden Road",
     "id": 5
   },
   {
-    "name": "c",
-    "contact": "",
-    "email": "",
-    "phone": "",
-    "address": "",
+    "name": "Texas Road House",
+    "contact": "Texas Corporate",
+    "email": "texasroadhouse@email.com",
+    "phone": "345-678-9012",
+    "address": "Texas Road",
     "id": 6
   },
   {
-    "name": "e",
-    "contact": "",
-    "email": "",
-    "phone": "",
-    "address": "",
+    "name": "Dallas BBQ",
+    "contact": "Dallas Corporate",
+    "email": "Dallasbbq@email.com",
+    "phone": "567-890-1234",
+    "address": "Dallas Road",
     "id": 7
   },
   {
-    "name": "f",
-    "contact": "",
-    "email": "",
-    "phone": "",
-    "address": "",
+    "name": "Outback Steakhouse",
+    "contact": "Outback",
+    "email": "Outbacksteakhouse@email.com",
+    "phone": "678-901-2345",
+    "address": "Outback Road",
     "id": 8
-  },
-  {
-    "name": "g",
-    "contact": "",
-    "email": "",
-    "phone": "",
-    "address": "",
-    "id": 9
-  },
-  {
-    "name": "h",
-    "contact": "",
-    "email": "",
-    "phone": "",
-    "address": "",
-    "id": 10
   }
 ]

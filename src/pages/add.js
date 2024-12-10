@@ -97,6 +97,16 @@ export default function AddVendor() {
         >
           Add Vendor
         </Button>
+        {/* Added cancel button to return back to home page */}
+        <Button
+          fullWidth
+          variant="outlined"
+          color="secondary"
+          sx={{ mt: 1 }}
+          onClick={() => router.push("/")}
+        >
+          Cancel
+        </Button>
       </Box>
     </Container>
   );

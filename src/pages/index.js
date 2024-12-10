@@ -19,17 +19,16 @@ import {
   DialogTitle,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
-import TableSortLabel from '@mui/material/TableSortLabel';
+import TableSortLabel from "@mui/material/TableSortLabel";
 
 export default function Home() {
   const [vendors, setVendors] = useState([]);
   const [open, setOpen] = useState(false);
   const [selectedVendorId, setSelectedVendorId] = useState(null);
 
-  const [orderBy, setOrderBy] = useState('id'); 
-  const [order, setOrder] = useState('asc');
+  const [orderBy, setOrderBy] = useState("id");
+  const [order, setOrder] = useState("asc");
   // for sorting by vendor id or name
-
 
   useEffect(() => {
     fetch("/api/vendors")
@@ -68,18 +67,18 @@ export default function Home() {
   };
 
   const handleSort = (property) => {
-    const isAsc = orderBy === property && order === 'asc';
-    setOrder(isAsc ? 'desc' : 'asc');
+    const isAsc = orderBy === property && order === "asc";
+    setOrder(isAsc ? "desc" : "asc");
     setOrderBy(property);
   };
-  
+
   vendors.sort((a, b) => {
-    if (order === 'asc') {
+    if (order === "asc") {
       return a[orderBy] < b[orderBy] ? -1 : 1;
     }
     return a[orderBy] > b[orderBy] ? -1 : 1;
   });
-  
+
   // Sort vendor based on orderBy or order
   return (
     <Container>
@@ -95,33 +94,51 @@ export default function Home() {
           Add Vendor
         </Button>
       </Link>
-      <TableContainer component={Paper} sx={{ overflowX: "auto" }}>
-        {/* Allows table to be scrollable on smaller screens */}
-        <Table>
+
+      <TableContainer
+        component={Paper}
+        sx={{
+          overflowX: "auto",
+          maxHeight: "80vh", // Constrain the table's height for scrollable content
+        }}
+      >
+        {/* Sticky Header to ensure layout adapts smoothly to different devices */}
+        <Table stickyHeader>
           <TableHead>
-            <TableRow>
-            <TableCell>
-              {/* Sort by ID */}
-              <TableSortLabel
-                active={orderBy === 'id'}
-                direction={orderBy === 'id' ? order : 'asc'}
-                onClick={() => handleSort('id')}
-              >
-                <strong>ID</strong>
-              </TableSortLabel>
-            </TableCell>
-            <TableCell>
-              {/* Sort by Vendor Name */}
-              <TableSortLabel
-                active={orderBy === 'name'}
-                direction={orderBy === 'name' ? order : 'asc'}
-                onClick={() => handleSort('name')}
-              >
-                <strong>Name</strong>
-              </TableSortLabel>
-            </TableCell>
+            <TableRow
+              sx={{
+                backgroundColor: "background.paper", // Ensure sticky header background matches the theme
+              }}
+            >
               <TableCell>
-                <strong>Contact</strong>
+                {/* Sort by ID */}
+                <TableSortLabel
+                  active={orderBy === "id"}
+                  direction={orderBy === "id" ? order : "asc"}
+                  onClick={() => handleSort("id")}
+                >
+                  <strong>ID</strong>
+                </TableSortLabel>
+              </TableCell>
+              <TableCell>
+                {/* Sort by Vendor Name */}
+                <TableSortLabel
+                  active={orderBy === "name"}
+                  direction={orderBy === "name" ? order : "asc"}
+                  onClick={() => handleSort("name")}
+                >
+                  <strong>Name</strong>
+                </TableSortLabel>
+              </TableCell>
+              <TableCell>
+                {/* Sort by Contact */}
+                <TableSortLabel
+                  active={orderBy === "contact"}
+                  direction={orderBy === "contact" ? order : "asc"}
+                  onClick={() => handleSort("contact")}
+                >
+                  <strong>Contact</strong>
+                </TableSortLabel>
               </TableCell>
               <TableCell>
                 <strong>Email</strong>
@@ -148,7 +165,7 @@ export default function Home() {
                   "&:hover": { backgroundColor: "rgba(0, 0, 0, 0.1)" },
                 }}
               >
-                {/* Hover color added to improve visability for vendor table */}
+                {/* Hover color added to improve visibility for vendor table */}
                 <TableCell>{vendor.id}</TableCell>
                 <TableCell>{vendor.name}</TableCell>
                 <TableCell>{vendor.contact}</TableCell>
