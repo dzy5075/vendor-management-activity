@@ -5,7 +5,8 @@
     "contact": "John Doe",
     "email": "john@acmesupplies.com",
     "phone": "555-1234",
-    "address": "123 Elm Street, Springfield"
+    "address": "123 Elm Street, Springfield",
+    "category": "Packaging"
   },
   {
     "id": 2,
@@ -13,7 +14,8 @@
     "contact": "Jane Smith",
     "email": "jane@globaltech.com",
     "phone": "555-5678",
-    "address": "456 Oak Avenue, Metropolis"
+    "address": "456 Oak Avenue, Metropolis",
+    "category": "Packaging"
   },
   {
     "id": 3,
@@ -21,7 +23,8 @@
     "contact": "Mike Johnson",
     "email": "mike@supplyhub.com",
     "phone": "555-8765",
-    "address": "789 Pine Road, Gotham"
+    "address": "789 Pine Road, Gotham",
+    "category": "Containers"
   },
   {
     "name": "Apple Bee",
@@ -29,7 +32,8 @@
     "email": "applebee@email.com",
     "phone": "123-123-1234",
     "address": "AppleBee Road",
-    "id": 4
+    "id": 4,
+    "category": "Utensils"
   },
   {
     "name": "Olive Garden",
@@ -37,7 +41,8 @@
     "email": "olivegarden@email.com",
     "phone": "234-567-8901",
     "address": "Olive Garden Road",
-    "id": 5
+    "id": 5,
+    "category": "Utensils"
   },
   {
     "name": "Texas Road House",
@@ -45,7 +50,8 @@
     "email": "texasroadhouse@email.com",
     "phone": "345-678-9012",
     "address": "Texas Road",
-    "id": 6
+    "id": 6,
+    "category": "Containers"
   },
   {
     "name": "Dallas BBQ",
@@ -53,7 +59,8 @@
     "email": "Dallasbbq@email.com",
     "phone": "567-890-1234",
     "address": "Dallas Road",
-    "id": 7
+    "id": 7,
+    "category": "Utensils"
   },
   {
     "name": "Outback Steakhouse",
@@ -61,7 +68,8 @@
     "email": "Outbacksteakhouse@email.com",
     "phone": "678-901-2345",
     "address": "Outback Road",
-    "id": 8
+    "id": 8,
+    "category": "Utensils"
   },
   {
     "name": "McDonalds",
@@ -69,14 +77,16 @@
     "email": "Mcdonalds@email.com",
     "phone": "333-333-3333",
     "address": "McDonalds Ave",
-    "id": 9
+    "id": 9,
+    "category": "Containers"
   },
   {
     "name": "Burger King",
-    "contact": "BK",
+    "contact": "Burger King Office",
     "email": "BK@email.com",
     "phone": "222-222-2222",
     "address": "Bk Road",
-    "id": 10
+    "id": 10,
+    "category": "Utensils"
   }
 ]
