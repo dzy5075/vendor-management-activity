@@ -33,7 +33,7 @@ import TableSortLabel from "@mui/material/TableSortLabel";
 export default function Home() {
   const [vendors, setVendors] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [filterField, setFilterField] = useState("all"); // "all" searches across all fields
+  const [filterField, setFilterField] = useState("all");
   const [sortColumn, setSortColumn] = useState("id");
   const [sortOrder, setSortOrder] = useState("asc");
   const [page, setPage] = useState(0);
@@ -43,7 +43,6 @@ export default function Home() {
   const [selectedVendorId, setSelectedVendorId] = useState(null);
   const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" });
 
-  // Fetch the vendor list on component mount
   useEffect(() => {
     fetch("/api/vendors")
       .then((res) => res.json())
@@ -51,27 +50,21 @@ export default function Home() {
       .catch((error) => console.error("Failed to fetch vendors:", error));
   }, []);
 
-  // Handle search input changes
   const handleSearchChange = (e) => setSearchQuery(e.target.value.toLowerCase());
-
-  // Handle filter field selection (Name, Contact, etc. or "all")
   const handleFilterChange = (e) => setFilterField(e.target.value);
 
-  // Manage sorting logic
   const handleSort = (property) => {
     const isAsc = sortColumn === property && sortOrder === "asc";
     setSortOrder(isAsc ? "desc" : "asc");
     setSortColumn(property);
   };
 
-  // Pagination controls
   const handlePageChange = (_, newPage) => setPage(newPage);
   const handleRowsPerPageChange = (event) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
 
-  // Deletion dialog controls
   const openDeleteDialog = (id) => {
     setSelectedVendorId(id);
     setDeleteDialogOpen(true);
@@ -81,7 +74,6 @@ export default function Home() {
     setSelectedVendorId(null);
   };
 
-  // Handle vendor deletion from the system
   const handleDelete = async () => {
     try {
       const res = await fetch(`/api/vendors/${selectedVendorId}`, { method: "DELETE" });
@@ -94,21 +86,17 @@ export default function Home() {
     }
   };
 
-  // Close snackbar notifications
   const closeSnackbar = () => setSnackbar((prev) => ({ ...prev, open: false }));
 
-  // Filter and sort vendors before pagination
   const filteredVendors = vendors
     .filter((vendor) => {
       if (!searchQuery) return true;
       if (filterField === "all") {
-        // Checks all relevant fields including category
         const fields = [vendor.name, vendor.contact, vendor.email, vendor.phone, vendor.category].map((val) =>
           (val || "").toLowerCase()
         );
         return fields.some((field) => field.startsWith(searchQuery));
       } else {
-        // Checks only the selected field
         const fieldValue = (vendor[filterField] || "").toLowerCase();
         return fieldValue.startsWith(searchQuery);
       }
@@ -124,7 +112,6 @@ export default function Home() {
 
   const paginatedVendors = filteredVendors.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 
-  // Export current filtered data as CSV
   const exportData = () => {
     const headers = ["ID", "Name", "Contact", "Email", "Phone", "Category"];
     const rows = filteredVendors.map((vendor) => [
@@ -136,9 +123,9 @@ export default function Home() {
       vendor.category,
     ]);
 
-    let csvContent = "data:text/csv;charset=utf-8,"
+    const csvContent = "data:text/csv;charset=utf-8,"
       + headers.join(",") + "\n"
-      + rows.map((row) => row.join(",")).join("\n");
+      + rows.map((r) => r.join(",")).join("\n");
 
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
@@ -149,23 +136,32 @@ export default function Home() {
     document.body.removeChild(link);
   };
 
+  const cellStyle = { py: 1, px: 2, lineHeight: '1.5', verticalAlign: 'middle' };
+
   return (
-    <Container>
-      <Typography variant="h4" component="h1" gutterBottom>
-        EcoWare (Vendor Management System)
-      </Typography>
-      <Box sx={{ display: "flex", gap: 2, mb: 2 }}>
-        <Link href="/add" passHref>
-          <Button variant="contained" color="primary">
-            <strong>Add Vendor</strong>
-          </Button>
-        </Link>
-        <Button variant="outlined" onClick={exportData}>
-          Export Data
-        </Button>
+    <Container sx={{ backgroundColor: '#faf8ee', minHeight: '100vh', py: 4 }}>
+      {/* Title (no subtitle, smaller font for one line, tan background applied to entire container) */}
+      <Box sx={{ textAlign: 'center', mb: 4 }}>
+        <Typography
+          variant="h4"
+          sx={{
+            fontWeight: 'bold',
+            color: '#7cb342', // A slightly darker, more stable green
+          }}
+        >
+          EcoWare (Vendor Management System)
+        </Typography>
       </Box>
 
-      {/* Filter and Search */}
+      {/* Add Vendor & Export Buttons */}
+      <Box sx={{ display: "flex", gap: 2, mb: 2 }}>
+        <Link href="/add" passHref>
+          <Button variant="contained" color="primary"><strong>Add New Vendor</strong></Button>
+        </Link>
+        <Button variant="outlined" onClick={exportData}><strong>Export Data</strong></Button>
+      </Box>
+
+      {/* Filter & Search */}
       <Box sx={{ display: "flex", alignItems: "center", mb: 2, gap: 2 }}>
         <FormControl sx={{ width: 200 }}>
           <InputLabel>Filter By</InputLabel>
@@ -190,13 +186,12 @@ export default function Home() {
         />
       </Box>
 
-      {/* Vendor Table */}
       <TableContainer component={Paper} sx={{ overflowX: "auto", maxHeight: "80vh" }}>
         <Table stickyHeader>
           <TableHead>
             <TableRow>
               {["id", "name", "contact", "email", "phone", "category"].map((col) => (
-                <TableCell key={col}>
+                <TableCell key={col} sx={cellStyle}>
                   {["id", "name", "contact", "category"].includes(col) ? (
                     <TableSortLabel
                       active={sortColumn === col}
@@ -210,23 +205,21 @@ export default function Home() {
                   )}
                 </TableCell>
               ))}
-              <TableCell><strong>Actions</strong></TableCell>
+              <TableCell sx={cellStyle}><strong>Actions</strong></TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {paginatedVendors.map((vendor) => (
               <TableRow key={vendor.id}>
-                <TableCell>{vendor.id}</TableCell>
-                <TableCell>{vendor.name}</TableCell>
-                <TableCell>{vendor.contact}</TableCell>
-                <TableCell>{vendor.email}</TableCell>
-                <TableCell>{vendor.phone}</TableCell>
-                <TableCell>{vendor.category}</TableCell>
-                <TableCell>
+                <TableCell sx={cellStyle}>{vendor.id}</TableCell>
+                <TableCell sx={cellStyle}>{vendor.name}</TableCell>
+                <TableCell sx={cellStyle}>{vendor.contact}</TableCell>
+                <TableCell sx={cellStyle}>{vendor.email}</TableCell>
+                <TableCell sx={cellStyle}>{vendor.phone}</TableCell>
+                <TableCell sx={cellStyle}>{vendor.category}</TableCell>
+                <TableCell sx={cellStyle}>
                   <Link href={`/edit/${vendor.id}`} passHref>
-                    <Button variant="outlined" color="primary" size="small" sx={{ mr: 1 }}>
-                      Edit
-                    </Button>
+                    <Button variant="outlined" color="primary" size="small" sx={{ mr: 1 }}>Edit</Button>
                   </Link>
                   <IconButton color="secondary" onClick={() => openDeleteDialog(vendor.id)}>
                     <DeleteIcon />
@@ -236,7 +229,7 @@ export default function Home() {
             ))}
             {paginatedVendors.length === 0 && (
               <TableRow>
-                <TableCell colSpan={7} align="center">
+                <TableCell colSpan={7} align="center" sx={{ py: 2 }}>
                   No vendors available.
                 </TableCell>
               </TableRow>
@@ -245,7 +238,6 @@ export default function Home() {
         </Table>
       </TableContainer>
 
-      {/* Pagination */}
       <TablePagination
         rowsPerPageOptions={[5, 10, 25]}
         component="div"
@@ -256,13 +248,11 @@ export default function Home() {
         onRowsPerPageChange={handleRowsPerPageChange}
       />
 
-      {/* Delete Confirmation Dialog */}
       <Dialog open={deleteDialogOpen} onClose={closeDeleteDialog}>
         <DialogTitle>Delete Vendor</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Are you sure you want to delete{" "}
-            <strong>{vendors.find((v) => v.id === selectedVendorId)?.name}</strong>? This action cannot be undone.
+            Are you sure you want to delete <strong>{vendors.find((v) => v.id === selectedVendorId)?.name}</strong>? This action cannot be undone.
           </DialogContentText>
         </DialogContent>
         <DialogActions>
@@ -271,7 +261,6 @@ export default function Home() {
         </DialogActions>
       </Dialog>
 
-      {/* Notifications */}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={6000}

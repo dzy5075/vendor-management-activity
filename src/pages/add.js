@@ -54,8 +54,20 @@ export default function AddVendor() {
   };
 
   return (
-    <Container maxWidth="sm" sx={{ mt: 4 }}>
-      <Typography variant="h4" align="center" gutterBottom>Add New Vendor</Typography>
+    <Container maxWidth="sm" sx={{ backgroundColor: '#faf8ee', minHeight: '100vh', py: 4 }}>
+      {/* Enhanced Title Section, smaller font and no subtitle */}
+      <Box sx={{ textAlign: 'center', mb: 4 }}>
+        <Typography
+          variant="h4"
+          sx={{
+            fontWeight: 'bold',
+            color: '#7cb342', // Light grass green
+          }}
+        >
+          Add New Vendor
+        </Typography>
+      </Box>
+
       <Box component="form" onSubmit={handleSubmit} sx={{ display: "grid", gap: 2 }}>
         <TextField name="name" label="Name" value={vendor.name} onChange={handleChange} error={!!errors.name} helperText={errors.name} fullWidth required />
         <TextField name="contact" label="Contact" value={vendor.contact} onChange={handleChange} error={!!errors.contact} helperText={errors.contact} fullWidth required />

@@ -50,7 +50,7 @@ export default function EditVendor() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
-
+    // Enhanced Put Method with custom validation and success/error messages.
     try {
       const res = await fetch(`/api/vendors/${id}`, {
         method: "PUT",
@@ -66,8 +66,20 @@ export default function EditVendor() {
   };
 
   return (
-    <Container maxWidth="sm" sx={{ mt: 4 }}>
-      <Typography variant="h4" component="h1" gutterBottom>Edit Vendor</Typography>
+    <Container maxWidth="sm" sx={{ backgroundColor: '#faf8ee', minHeight: '100vh', py: 4 }}>
+      {/* Enhanced Title: Same styling as requested, smaller and one line */}
+      <Box sx={{ textAlign: 'center', mb: 4 }}>
+        <Typography
+          variant="h4"
+          sx={{
+            fontWeight: 'bold',
+            color: '#7cb342',
+          }}
+        >
+          Edit Vendor
+        </Typography>
+      </Box>
+
       <Box component="form" onSubmit={handleSubmit} sx={{ display: "grid", gap: 2 }}>
         <TextField name="id" label="ID" value={vendor.id} InputProps={{ readOnly: true }} fullWidth />
         <TextField name="name" label="Name" value={vendor.name} onChange={handleChange} error={!!errors.name} helperText={errors.name} fullWidth required />
