@@ -55,13 +55,12 @@ export default function AddVendor() {
 
   return (
     <Container maxWidth="sm" sx={{ backgroundColor: '#faf8ee', minHeight: '100vh', py: 4 }}>
-      {/* Enhanced Title Section, smaller font and no subtitle */}
       <Box sx={{ textAlign: 'center', mb: 4 }}>
         <Typography
           variant="h4"
           sx={{
             fontWeight: 'bold',
-            color: '#7cb342', // Light grass green
+            color: '#4ad500',
           }}
         >
           Add New Vendor

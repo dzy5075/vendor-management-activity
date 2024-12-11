@@ -18,10 +18,20 @@ export default function EditVendor() {
   const router = useRouter();
   const { id } = router.query;
 
-  const [vendor, setVendor] = useState({ id: "", name: "", contact: "", email: "", phone: "", address: "", category: "" });
+  const [vendor, setVendor] = useState({
+    id: "",
+    name: "",
+    contact: "",
+    email: "",
+    phone: "",
+    address: "",
+    category: "",
+  });
+  
   const [errors, setErrors] = useState({});
   const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" });
 
+  // Fetch vendor data on mount
   useEffect(() => {
     if (!id) return;
     fetch(`/api/vendors/${id}`)
@@ -36,21 +46,26 @@ export default function EditVendor() {
 
   const handleChange = (e) => setVendor({ ...vendor, [e.target.name]: e.target.value });
 
-  // Validate fields including category
+  // Validate required fields and email format
   const validateForm = () => {
     const validationErrors = {};
     ["name", "contact", "email", "phone", "address", "category"].forEach((field) => {
-      if (!vendor[field]?.trim()) validationErrors[field] = `${field.charAt(0).toUpperCase() + field.slice(1)} is required.`;
-      if (field === "email" && !/^\S+@\S+\.\S+$/.test(vendor.email)) validationErrors.email = "Valid email is required.";
+      if (!vendor[field]?.trim()) {
+        validationErrors[field] = `${field.charAt(0).toUpperCase() + field.slice(1)} is required.`;
+      }
+      if (field === "email" && !/^\S+@\S+\.\S+$/.test(vendor.email)) {
+        validationErrors.email = "Valid email is required.";
+      }
     });
     setErrors(validationErrors);
     return Object.keys(validationErrors).length === 0;
   };
 
+  // Update vendor info, Enhanced Put method with validation and success/error messages
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
-    // Enhanced Put Method with custom validation and success/error messages.
+
     try {
       const res = await fetch(`/api/vendors/${id}`, {
         method: "PUT",
@@ -67,13 +82,12 @@ export default function EditVendor() {
 
   return (
     <Container maxWidth="sm" sx={{ backgroundColor: '#faf8ee', minHeight: '100vh', py: 4 }}>
-      {/* Enhanced Title: Same styling as requested, smaller and one line */}
       <Box sx={{ textAlign: 'center', mb: 4 }}>
         <Typography
           variant="h4"
           sx={{
             fontWeight: 'bold',
-            color: '#7cb342',
+            color: '#4ad500',
           }}
         >
           Edit Vendor
@@ -81,12 +95,64 @@ export default function EditVendor() {
       </Box>
 
       <Box component="form" onSubmit={handleSubmit} sx={{ display: "grid", gap: 2 }}>
-        <TextField name="id" label="ID" value={vendor.id} InputProps={{ readOnly: true }} fullWidth />
-        <TextField name="name" label="Name" value={vendor.name} onChange={handleChange} error={!!errors.name} helperText={errors.name} fullWidth required />
-        <TextField name="contact" label="Contact" value={vendor.contact} onChange={handleChange} error={!!errors.contact} helperText={errors.contact} fullWidth required />
-        <TextField name="email" label="Email" type="email" value={vendor.email} onChange={handleChange} error={!!errors.email} helperText={errors.email} fullWidth required />
-        <TextField name="phone" label="Phone" value={vendor.phone} onChange={handleChange} error={!!errors.phone} helperText={errors.phone} fullWidth required />
-        <TextField name="address" label="Address" value={vendor.address} onChange={handleChange} error={!!errors.address} helperText={errors.address} fullWidth required />
+        <TextField
+          name="id"
+          label="ID"
+          value={vendor.id}
+          InputProps={{ readOnly: true }}
+          fullWidth
+        />
+        <TextField
+          name="name"
+          label="Name"
+          value={vendor.name}
+          onChange={handleChange}
+          error={!!errors.name}
+          helperText={errors.name}
+          fullWidth
+          required
+        />
+        <TextField
+          name="contact"
+          label="Contact"
+          value={vendor.contact}
+          onChange={handleChange}
+          error={!!errors.contact}
+          helperText={errors.contact}
+          fullWidth
+          required
+        />
+        <TextField
+          name="email"
+          label="Email"
+          type="email"
+          value={vendor.email}
+          onChange={handleChange}
+          error={!!errors.email}
+          helperText={errors.email}
+          fullWidth
+          required
+        />
+        <TextField
+          name="phone"
+          label="Phone"
+          value={vendor.phone}
+          onChange={handleChange}
+          error={!!errors.phone}
+          helperText={errors.phone}
+          fullWidth
+          required
+        />
+        <TextField
+          name="address"
+          label="Address"
+          value={vendor.address}
+          onChange={handleChange}
+          error={!!errors.address}
+          helperText={errors.address}
+          fullWidth
+          required
+        />
 
         <FormControl fullWidth error={!!errors.category} required>
           <InputLabel>Category</InputLabel>
@@ -95,13 +161,27 @@ export default function EditVendor() {
             <MenuItem value="Packaging">Packaging</MenuItem>
             <MenuItem value="Containers">Containers</MenuItem>
           </Select>
-          {errors.category && <Alert severity="error" sx={{ mt: 1 }}>{errors.category}</Alert>}
+          {errors.category && (
+            <Alert severity="error" sx={{ mt: 1 }}>
+              {errors.category}
+            </Alert>
+          )}
         </FormControl>
 
-        <Button type="submit" variant="contained" color="primary" fullWidth>Update Vendor</Button>
-        <Button variant="outlined" color="secondary" fullWidth onClick={() => router.push("/")}>Cancel</Button>
+        <Button type="submit" variant="contained" color="primary" fullWidth>
+          Update Vendor
+        </Button>
+        <Button variant="outlined" color="secondary" fullWidth onClick={() => router.push("/")}>
+          Cancel
+        </Button>
       </Box>
-      <Snackbar open={snackbar.open} autoHideDuration={6000} onClose={() => setSnackbar(prev => ({ ...prev, open: false }))} anchorOrigin={{ vertical: "top", horizontal: "center" }}>
+
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
         <Alert severity={snackbar.severity}>{snackbar.message}</Alert>
       </Snackbar>
     </Container>

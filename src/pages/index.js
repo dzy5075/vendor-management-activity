@@ -146,7 +146,7 @@ export default function Home() {
           variant="h4"
           sx={{
             fontWeight: 'bold',
-            color: '#7cb342', // A slightly darker, more stable green
+            color: '#4ad500', // A slightly darker, more stable green
           }}
         >
           EcoWare (Vendor Management System)
