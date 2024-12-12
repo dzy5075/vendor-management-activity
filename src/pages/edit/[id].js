@@ -27,9 +27,13 @@ export default function EditVendor() {
     address: "",
     category: "",
   });
-  
+
   const [errors, setErrors] = useState({});
-  const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" });
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
 
   // Fetch vendor data on mount
   useEffect(() => {
@@ -44,24 +48,29 @@ export default function EditVendor() {
       });
   }, [id, router]);
 
-  const handleChange = (e) => setVendor({ ...vendor, [e.target.name]: e.target.value });
+  const handleChange = (e) =>
+    setVendor({ ...vendor, [e.target.name]: e.target.value });
 
   // Validate required fields and email format
   const validateForm = () => {
     const validationErrors = {};
-    ["name", "contact", "email", "phone", "address", "category"].forEach((field) => {
-      if (!vendor[field]?.trim()) {
-        validationErrors[field] = `${field.charAt(0).toUpperCase() + field.slice(1)} is required.`;
+    ["name", "contact", "email", "phone", "address", "category"].forEach(
+      (field) => {
+        if (!vendor[field]?.trim()) {
+          validationErrors[field] = `${
+            field.charAt(0).toUpperCase() + field.slice(1)
+          } is required.`;
+        }
+        if (field === "email" && !/^\S+@\S+\.\S+$/.test(vendor.email)) {
+          validationErrors.email = "Valid email is required.";
+        }
       }
-      if (field === "email" && !/^\S+@\S+\.\S+$/.test(vendor.email)) {
-        validationErrors.email = "Valid email is required.";
-      }
-    });
+    );
     setErrors(validationErrors);
     return Object.keys(validationErrors).length === 0;
   };
 
-  // Update vendor info, Enhanced Put method with validation and success/error messages
+  // Update vendor info, Enhanced Put method with validation and success/error notifications
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
@@ -73,7 +82,11 @@ export default function EditVendor() {
         body: JSON.stringify(vendor),
       });
       if (!res.ok) throw new Error("Failed to update vendor.");
-      setSnackbar({ open: true, message: "Vendor updated successfully!", severity: "success" });
+      setSnackbar({
+        open: true,
+        message: "Vendor updated successfully!",
+        severity: "success",
+      });
       setTimeout(() => router.push("/"), 2000);
     } catch (error) {
       setSnackbar({ open: true, message: error.message, severity: "error" });
@@ -81,20 +94,27 @@ export default function EditVendor() {
   };
 
   return (
-    <Container maxWidth="sm" sx={{ backgroundColor: '#faf8ee', minHeight: '100vh', py: 4 }}>
-      <Box sx={{ textAlign: 'center', mb: 4 }}>
+    <Container
+      maxWidth="sm"
+      sx={{ backgroundColor: "#faf8ee", minHeight: "100vh", py: 4 }}
+    >
+      <Box sx={{ textAlign: "center", mb: 4 }}>
         <Typography
           variant="h4"
           sx={{
-            fontWeight: 'bold',
-            color: '#4ad500',
+            fontWeight: "bold",
+            color: "#4ad500",
           }}
         >
           Edit Vendor
         </Typography>
       </Box>
 
-      <Box component="form" onSubmit={handleSubmit} sx={{ display: "grid", gap: 2 }}>
+      <Box
+        component="form"
+        onSubmit={handleSubmit}
+        sx={{ display: "grid", gap: 2 }}
+      >
         <TextField
           name="id"
           label="ID"
@@ -156,7 +176,11 @@ export default function EditVendor() {
 
         <FormControl fullWidth error={!!errors.category} required>
           <InputLabel>Category</InputLabel>
-          <Select name="category" value={vendor.category} onChange={handleChange}>
+          <Select
+            name="category"
+            value={vendor.category}
+            onChange={handleChange}
+          >
             <MenuItem value="Utensils">Utensils</MenuItem>
             <MenuItem value="Packaging">Packaging</MenuItem>
             <MenuItem value="Containers">Containers</MenuItem>
@@ -171,7 +195,12 @@ export default function EditVendor() {
         <Button type="submit" variant="contained" color="primary" fullWidth>
           Update Vendor
         </Button>
-        <Button variant="outlined" color="secondary" fullWidth onClick={() => router.push("/")}>
+        <Button
+          variant="outlined"
+          color="secondary"
+          fullWidth
+          onClick={() => router.push("/")}
+        >
           Cancel
         </Button>
       </Box>

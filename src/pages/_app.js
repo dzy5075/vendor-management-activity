@@ -1,34 +1,34 @@
-import * as React from 'react';
-import PropTypes from 'prop-types';
-import Head from 'next/head';
-import { ThemeProvider, createTheme } from '@mui/material/styles';
-import CssBaseline from '@mui/material/CssBaseline';
+import * as React from "react";
+import PropTypes from "prop-types";
+import Head from "next/head";
+import { ThemeProvider, createTheme } from "@mui/material/styles";
+import CssBaseline from "@mui/material/CssBaseline";
 
 // Revised to be more responsive between different deveices
 const theme = createTheme({
   palette: {
-    primary: { main: '#1976d2' },
-    secondary: { main: '#dc004e' },
+    primary: { main: "#1976d2" },
+    secondary: { main: "#dc004e" },
     background: {
-      default: '#f5f5f5',
-      paper: '#ffffff',
+      default: "#f5f5f5",
+      paper: "#ffffff",
     },
   },
   typography: {
-    fontFamily: 'Roboto, Arial, sans-serif',
+    fontFamily: "Roboto, Arial, sans-serif",
     fontSize: 14,
-    h1: { fontWeight: 700, fontSize: '2.5rem', lineHeight: 1.2 },
-    h2: { fontWeight: 600, fontSize: '2rem', lineHeight: 1.3 },
-    body1: { fontSize: '1rem', lineHeight: 1.5 },
+    h1: { fontWeight: 700, fontSize: "2.5rem", lineHeight: 1.2 },
+    h2: { fontWeight: 600, fontSize: "2rem", lineHeight: 1.3 },
+    body1: { fontSize: "1rem", lineHeight: 1.5 },
   },
   components: {
     MuiCssBaseline: {
       styleOverrides: {
         body: {
-          backgroundColor: '#f5f5f5',
-          animation: 'fadeIn 0.3s ease-in-out',
+          backgroundColor: "#f5f5f5",
+          animation: "fadeIn 0.3s ease-in-out",
         },
-        '@keyframes fadeIn': {
+        "@keyframes fadeIn": {
           from: { opacity: 0 },
           to: { opacity: 1 },
         },
@@ -37,16 +37,14 @@ const theme = createTheme({
     MuiButton: {
       styleOverrides: {
         root: {
-          borderRadius: '8px', // Rounded buttons
-          textTransform: 'none', // Disable uppercase text
-          padding: '8px 16px',
+          borderRadius: "8px", // Rounded buttons
+          textTransform: "none", // Disable uppercase text
+          padding: "8px 16px",
         },
       },
     },
   },
 });
-
-
 
 export default function MyApp(props) {
   const { Component, pageProps } = props;
